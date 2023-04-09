@@ -1,0 +1,40 @@
+﻿@page
+@model WebChatApp.Pages.LoginModel
+@{
+}
+
+<div class="container mt-5">
+    <div class="row justify-content-center align-items-center">
+        <div class="col-sm-12 col-md-12 col-lg-4">
+            <h1 class="mb-3">Login</h1>
+
+            <form method="post">
+                <div asp-validation-summary="All" class="text-danger">
+
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label" asp-for="modelLog.Email">Email Address</label>
+                    <input type="text" asp-for="modelLog.Email" class="form-control"/>
+                    <span asp-validation-for="modelLog.Email" class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label" asp-for="modelLog.Password">Password</label>
+                    <input type="password" asp-for="modelLog.Password" class="form-control" />
+                    <span asp-validation-for="modelLog.Password" class="text-danger"></span>
+                </div>
+
+
+                <div class="mb-3 form-check">
+                    <input type="checkbox" asp-for="modelLog.RememberMe" class="form-check-input" />
+                    <label class="form-check-label" asp-for="modelLog.RememberMe">Remember me</label>
+                </div>
+
+                <div class="mb-3">
+                    <button type="submit" class="btn btn-primary">Login</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
