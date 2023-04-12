@@ -28,7 +28,12 @@ builder.Services.ConfigureApplicationCookie(config =>
 builder.Services.AddScoped<UserInfo>();
 builder.Services.AddScoped<RegisterUser>();
 builder.Services.AddScoped<ContactsService>();
-builder.Services.AddSingleton<ListsService>();
+
+/*
+ the references of services in DI container is stored and used in server side and not in client side,
+so when we register a singleton service this means its data will be shared among all users so, make sure when to use it.
+ */
+//builder.Services.AddSingleton<ListsService>();
 
 
 var app = builder.Build();

@@ -31,7 +31,6 @@ namespace WebChatApp.Services
         {
             if(user == null)
             {
-
                 IdentityUser logged = await this._signInManager.UserManager.GetUserAsync(claimsPrincipal);
 
                 user = await _authDbContext.Users

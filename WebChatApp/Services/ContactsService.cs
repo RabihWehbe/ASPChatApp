@@ -1,4 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Memory;
+using System.Xml.Linq;
 using WebChatApp.Model;
 using WebChatApp.ViewModels;
 
@@ -9,13 +11,18 @@ namespace WebChatApp.Services
         public AuthDbContext _context { get; set; }
         public UserInfo _userInfo { get; set; }
 
-        public ListsService _listsService { get; set; }
 
-        public ContactsService(AuthDbContext context,UserInfo userInfo,ListsService listsService)
+        public List<Contact>? contacts { get; set; } = null;
+
+        private readonly IMemoryCache _cache;
+
+        public  string _cacheKey { get; set; }
+
+        public ContactsService(AuthDbContext context,UserInfo userInfo,IMemoryCache cache)
         {
             _context = context;
             _userInfo = userInfo;
-            _listsService = listsService;
+            _cache = cache;
         }
 
         public async Task<User?> getUserId(string Email)
@@ -75,9 +82,16 @@ namespace WebChatApp.Services
                     Contactee_Id = contactee.UserId,
                     Name = viewModel.Name,
                 };
+
+                //save changes to the cache
+                contacts = await BrowseContacts(userID);
+                contacts.Add(contact);
+                _cacheKey = $"MyConatcts_{userID}";
+                _cache.Set(_cacheKey, contacts,TimeSpan.FromMinutes(5));
+
+                //save changes to database
                 _context.Contacts.Add(contact);
                 await _context.SaveChangesAsync();
-                _listsService.contacts.Add(contact);
             }
             return 1;
         } 
@@ -85,32 +99,31 @@ namespace WebChatApp.Services
 
         public async Task<List<Contact>> BrowseContacts(int userId)
         {
-            if(_listsService.contacts.Count == 0 && _listsService.isBrowsedContact == false)
+            _cacheKey = $"MyConatcts_{userId}";
+            Console.WriteLine($"------>BrowseContacts_{_cacheKey}");
+            
+            //trying to output a list of model, from caxche using the convenient key
+            if (!_cache.TryGetValue(_cacheKey, out List<Contact> myContacts))
             {
-                Console.WriteLine("----> calling DB context once for filling the contacts lists");
-                _listsService.contacts = await _context.Contacts
-                    .Where(c => c.OwnerId == userId)
-                    .Select(r => new Contact
-                    {
-                        Name = r.Name,
-                        ContactId = r.ContactId,
-                        OwnerId = r.OwnerId,
-                        Contactee_Id = r.Contactee_Id,
-                    }).ToListAsync();
-            }
-            else Console.WriteLine("----> This time we didn't call the DB context");
-            return _listsService.contacts;
+                Console.WriteLine($"------>BrowseContacts empty cache List=> call DB");
+                contacts = await _context.Contacts
+                .Where(c => c.OwnerId == userId)
+                .Select(r => new Contact
+                {
+                    Name = r.Name,
+                    ContactId = r.ContactId,
+                    OwnerId = r.OwnerId,
+                    Contactee_Id = r.Contactee_Id,
+                }).ToListAsync();
 
-            //List<Contact> contacts = await _context.Contacts
-            //        .Where(c => c.OwnerId == userId)
-            //        .Select(r => new Contact
-            //        {
-            //            Name = r.Name,
-            //            ContactId = r.ContactId,
-            //            OwnerId = r.OwnerId,
-            //           Contactee_Id = r.Contactee_Id,
-            //      }).ToListAsync();
-            //return contacts;
+                _cache.Set(_cacheKey, contacts, TimeSpan.FromMinutes(5));
+            }
+            else
+            {
+                Console.WriteLine($"------>BrowseContacts cache List contains values => contacts directly fetched from cache");
+                contacts = myContacts;
+            }
+            return contacts;
         }
     }
 }

@@ -14,7 +14,7 @@ namespace WebChatApp.Pages
 
         public User? user { get; set; }
 
-        public List<Contact> contacts { get; set; }
+        public List<Contact>? contacts { get; set; } = null;
 
         public UserInfo _userInfoService { get; set; }
 
@@ -31,7 +31,6 @@ namespace WebChatApp.Pages
         {
             //Getting User infos:
             user = await this._userInfoService.getLoggedUser(this.User);
-
             contacts = await this._contactsService.BrowseContacts(this.user.UserId);
         }
     }
