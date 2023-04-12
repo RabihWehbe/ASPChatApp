@@ -1,0 +1,42 @@
+﻿@page "{userId}"
+@model WebChatApp.Pages.CreateContactModel
+@{
+}
+
+
+<div class="container mt-5">
+    <div class="row justify-content-center align-items-center">
+        <div class="col-sm-12 col-md-12 col-lg-4">
+            <h1 class="mb-3">Add Contact</h1>
+
+            <form method="post">
+                <div asp-validation-summary="All" class="text-danger">
+                </div>
+
+                @if(Model.showSuccessMessage){
+                    <div class="alert alert-success" role="alert">
+                        <h4 class="alert-heading">Contact added succesfully</h4>
+                        <p>now you can view and contact this email account as contact.</p>
+                    </div>
+                }
+
+                <div class="mb-3">
+                    <label class="form-label" asp-for="contact.Email">Email Address</label>
+                    <input type="text" asp-for="contact.Email" class="form-control" />
+                    <span asp-validation-for="contact.Email" class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label" asp-for="contact.Name">Contact Name</label>
+                    <input type="text" asp-for="contact.Name" class="form-control" />
+                    <span asp-validation-for="contact.Name" class="text-danger"></span>
+                </div>
+
+
+                <div class="mb-3">
+                    <button type="submit" class="btn btn-primary">Add</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

@@ -1,6 +1,8 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using WebChatApp.Middlewares;
 using WebChatApp.Model;
+using WebChatApp.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -18,10 +20,15 @@ builder.Services.AddIdentity<IdentityUser, IdentityRole>().AddEntityFrameworkSto
 //configure the direction path of failed access to an authorized page:
 builder.Services.ConfigureApplicationCookie(config =>
 {
-    config.LoginPath = "/Login";
+    config.LoginPath = "/Welcome";
 });
 
 
+//Add my services:
+builder.Services.AddScoped<UserInfo>();
+builder.Services.AddScoped<RegisterUser>();
+builder.Services.AddScoped<ContactsService>();
+builder.Services.AddSingleton<ListsService>();
 
 
 var app = builder.Build();
@@ -44,6 +51,21 @@ app.UseAuthentication();
 
 app.UseAuthorization();
 
+
+/*
+ if we register a middleware here, every time we send a http request to this application this middleware is going to run,
+to make a middle run only for specific request, apply it here, but using StartsWithSegements method
+ */
+app.UseMiddleware<GetUserInfoMiddleware>();
+
+
+//app.MapWhen(context => context.Request.Path.StartsWithSegments("/my-path"),
+//        branch =>
+//        {
+//            branch.UseMiddleware<GetUserInfoMiddleware>();
+//        });
+
 app.MapRazorPages();
+
 
 app.Run();
